@@ -2,445 +2,132 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
   >
+  <meta name="theme-color" content="#12201a">
 
   <title>Lawin Canvas AR</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Poppins:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="style.css">
 
   <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
 
   <!-- MindAR -->
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-
-  <style>
-
-    html,
-    body {
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: transparent;
-    }
-
-    /* CAMERA VIDEO LAYER */
-    video#mindar-video {
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-
-      width: 100% !important;
-      height: 100% !important;
-
-      object-fit: cover !important;
-
-      z-index: 0 !important;
-
-      background: transparent !important;
-    }
-
-    /* A-FRAME LAYER */
-    .a-canvas {
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-
-      width: 100% !important;
-      height: 100% !important;
-
-      z-index: 1 !important;
-
-      background: transparent !important;
-    }
-
-    /* WELCOME SCREEN */
-
-    #welcomeScreen {
-      position: fixed;
-      inset: 0;
-
-      z-index: 9999;
-
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-
-      background: rgba(0, 0, 0, 0.94);
-
-      color: white;
-
-      text-align: center;
-
-      padding: 30px;
-
-      box-sizing: border-box;
-    }
-
-    #welcomeScreen h1 {
-      margin: 0 0 12px;
-      font-size: 30px;
-    }
-
-    #welcomeScreen p {
-      max-width: 320px;
-
-      line-height: 1.5;
-
-      margin: 0;
-
-      font-size: 16px;
-    }
-
-    #startButton {
-      margin-top: 28px;
-
-      padding: 15px 32px;
-
-      border: 0;
-
-      border-radius: 30px;
-
-      background: white;
-
-      color: black;
-
-      font-size: 17px;
-
-      font-weight: bold;
-    }
-
-    /* SCAN MESSAGE */
-
-    #scanMessage {
-      position: fixed;
-
-      z-index: 5000;
-
-      top: 20px;
-
-      left: 50%;
-
-      transform: translateX(-50%);
-
-      display: none;
-
-      padding: 10px 18px;
-
-      border-radius: 20px;
-
-      background: rgba(0, 0, 0, 0.7);
-
-      color: white;
-
-      font-size: 14px;
-
-      white-space: nowrap;
-    }
-
-  </style>
 </head>
-
 
 <body>
 
+  <!-- =========================================================
+       LAWIN CANVAS WELCOME SCREEN
+       Camera/AR engine is intentionally NOT started until the
+       user taps BEGIN AR EXPERIENCE.
+       ========================================================= -->
+  <div id="welcome-screen" aria-label="Lawin Canvas AR welcome screen">
 
-  <!-- WELCOME SCREEN -->
+    <div class="dust-field" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
 
-  <div id="welcomeScreen">
+    <div class="welcome-inner">
+      <div class="logo-glow" aria-hidden="true"></div>
 
-    <h1>Lawin Canvas</h1>
+      <img
+        class="logo"
+        src="assets/icons/logo.png"
+        alt="Lawin Canvas"
+        width="330"
+        height="330"
+        fetchpriority="high"
+      >
 
-    <p>
-      Welcome to your AR Experience.
-      <br><br>
-      Tap START, then point your camera at the painting.
-    </p>
+      <p class="welcome-copy">
+        Experience art beyond the canvas.<br>
+        Bring the painting to life with Lawin Canvas AR.
+      </p>
 
-    <button id="startButton">
-      START EXPERIENCE
-    </button>
+      <button id="start-btn" class="begin-button" type="button">
+        BEGIN AR EXPERIENCE
+      </button>
+    </div>
 
+    <p class="footer-tagline">BRING ART TO LIFE</p>
   </div>
 
-
-  <!-- SCAN MESSAGE -->
-
-  <div id="scanMessage">
+  <!-- Custom scanning message. MindAR's default scanning UI is disabled. -->
+  <div id="scan-message" role="status" aria-live="polite">
+    <span class="scan-dot" aria-hidden="true"></span>
     Point your camera at the painting
   </div>
 
-
-  <!-- AR SCENE -->
-
+  <!-- =========================================================
+       AR SCENE
+       autoStart:false is intentional: camera permission should
+       only be requested after the welcome button is tapped.
+       ========================================================= -->
   <a-scene
-
-    id="arScene"
-
+    id="ar-scene"
     embedded
-
     mindar-image="
       imageTargetSrc: assets/targets/targets.mind;
-      uiScanning: no;
+      autoStart: false;
+      uiError: no;
       uiLoading: no;
+      uiScanning: no;
     "
-
     color-space="sRGB"
-
-    renderer="
-      colorManagement: true;
-      physicallyCorrectLights: true;
-      alpha: true;
-    "
-
+    renderer="colorManagement: true; physicallyCorrectLights: true; alpha: true;"
     vr-mode-ui="enabled: false"
-
     device-orientation-permission-ui="enabled: false"
-
   >
 
-
-    <!-- VIDEO -->
-
     <a-assets>
-
       <video
-
         id="video-LC001"
-
         src="assets/videos/LC001.mp4"
-
         preload="auto"
-
         playsinline
-
         webkit-playsinline
-
         loop
-
         crossorigin="anonymous"
-
       ></video>
-
     </a-assets>
 
-
-    <!-- CAMERA -->
-
     <a-camera
-
       position="0 0 0"
-
       look-controls="enabled: false"
-
     ></a-camera>
 
-
-    <!-- PAINTING TARGET -->
-
     <a-entity
-
-      id="target-LC001"
-
+      id="target-0"
       mindar-image-target="targetIndex: 0"
-
     >
-
       <a-video
-
         id="videoPlane"
-
         src="#video-LC001"
-
         width="1"
-
         height="0.6667"
-
         position="0 0 0"
-
         material="shader: flat;"
-
       ></a-video>
-
     </a-entity>
-
 
   </a-scene>
 
-
-  <script>
-
-
-    const welcomeScreen =
-      document.getElementById("welcomeScreen");
-
-
-    const startButton =
-      document.getElementById("startButton");
-
-
-    const scanMessage =
-      document.getElementById("scanMessage");
-
-
-    const video =
-      document.getElementById("video-LC001");
-
-
-    const target =
-      document.getElementById("target-LC001");
-
-
-    /* ==========================
-       START EXPERIENCE
-    ========================== */
-
-    startButton.addEventListener("click", async () => {
-
-      console.log("START EXPERIENCE");
-
-      welcomeScreen.style.display = "none";
-
-      scanMessage.style.display = "block";
-
-
-      try {
-
-        video.load();
-
-      } catch (error) {
-
-        console.log("Video load:", error);
-
-      }
-
-    });
-
-
-    /* ==========================
-       PAINTING FOUND
-    ========================== */
-
-    target.addEventListener(
-      "targetFound",
-      async () => {
-
-        console.log("LC001 PAINTING FOUND");
-
-        scanMessage.style.display = "none";
-
-
-        try {
-
-          await video.play();
-
-          console.log(
-            "LC001 VIDEO PLAYING"
-          );
-
-        } catch (error) {
-
-          console.log(
-            "VIDEO PLAY FAILED:",
-            error
-          );
-
-        }
-
-      }
-    );
-
-
-    /* ==========================
-       PAINTING LOST
-    ========================== */
-
-    target.addEventListener(
-      "targetLost",
-      () => {
-
-        console.log(
-          "LC001 PAINTING LOST"
-        );
-
-        video.pause();
-
-      }
-    );
-
-
-    /* ==========================
-       VIDEO STATUS
-    ========================== */
-
-    video.addEventListener(
-      "loadeddata",
-      () => {
-
-        console.log(
-          "LC001 VIDEO DATA LOADED"
-        );
-
-      }
-    );
-
-
-    video.addEventListener(
-      "canplay",
-      () => {
-
-        console.log(
-          "LC001 VIDEO CAN PLAY"
-        );
-
-      }
-    );
-
-
-    video.addEventListener(
-      "playing",
-      () => {
-
-        console.log(
-          "LC001 VIDEO IS ACTUALLY PLAYING"
-        );
-
-      }
-    );
-
-
-    video.addEventListener(
-      "pause",
-      () => {
-
-        console.log(
-          "LC001 VIDEO PAUSED AT:",
-          video.currentTime
-        );
-
-      }
-    );
-
-
-    video.addEventListener(
-      "error",
-      () => {
-
-        console.log(
-          "LC001 VIDEO ERROR:",
-          video.error
-        );
-
-      }
-    );
-
-
-  </script>
-
+  <!-- Application logic. This file already contains the tested
+       LC001 playback + 6-second tracking grace-period behavior. -->
+  <script src="app.js" defer></script>
 
 </body>
 </html>
