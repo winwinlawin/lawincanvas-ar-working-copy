@@ -2,39 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-  >
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#12201a">
-
   <title>Lawin Canvas AR</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Poppins:wght@400;500;600&display=swap"
-    rel="stylesheet"
-  >
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="style.css">
-
-  <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-
-  <!-- MindAR -->
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 </head>
 
 <body>
-
-  <!-- =========================================================
-       LAWIN CANVAS WELCOME SCREEN
-       Camera/AR engine is intentionally NOT started until the
-       user taps BEGIN AR EXPERIENCE.
-       ========================================================= -->
   <div id="welcome-screen" aria-label="Lawin Canvas AR welcome screen">
-
     <div class="dust-field" aria-hidden="true">
       <span></span><span></span><span></span><span></span><span></span>
       <span></span><span></span><span></span><span></span><span></span>
@@ -42,46 +24,30 @@
 
     <div class="welcome-inner">
       <div class="logo-glow" aria-hidden="true"></div>
-
-      <img
-        class="logo"
-        src="assets/icons/logo.png"
-        alt="Lawin Canvas"
-        width="330"
-        height="330"
-        fetchpriority="high"
-      >
-
+      <img class="logo" src="assets/icons/logo.png" alt="Lawin Canvas" width="330" height="330" fetchpriority="high">
       <p class="welcome-copy">
         Experience art beyond the canvas.<br>
         Bring the painting to life with Lawin Canvas AR.
       </p>
-
-      <button id="start-btn" class="begin-button" type="button">
-        BEGIN AR EXPERIENCE
-      </button>
+      <button id="start-btn" class="begin-button" type="button">BEGIN AR EXPERIENCE</button>
     </div>
 
     <p class="footer-tagline">BRING ART TO LIFE</p>
   </div>
 
-  <!-- Custom scanning message. MindAR's default scanning UI is disabled. -->
   <div id="scan-message" role="status" aria-live="polite">
     <span class="scan-dot" aria-hidden="true"></span>
     Point your camera at the painting
   </div>
 
-  <!-- =========================================================
-       AR SCENE
-       autoStart:false is intentional: camera permission should
-       only be requested after the welcome button is tapped.
-       ========================================================= -->
+  <!-- IMPORTANT: keep MindAR auto-start enabled. This matches the previously
+       working LC001 camera pipeline. The welcome screen is only an overlay;
+       tapping BEGIN reveals the already-initialized camera/AR scene. -->
   <a-scene
     id="ar-scene"
     embedded
     mindar-image="
       imageTargetSrc: assets/targets/targets.mind;
-      autoStart: false;
       uiError: no;
       uiLoading: no;
       uiScanning: no;
@@ -91,7 +57,6 @@
     vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: false"
   >
-
     <a-assets>
       <video
         id="video-LC001"
@@ -104,15 +69,9 @@
       ></video>
     </a-assets>
 
-    <a-camera
-      position="0 0 0"
-      look-controls="enabled: false"
-    ></a-camera>
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-    <a-entity
-      id="target-0"
-      mindar-image-target="targetIndex: 0"
-    >
+    <a-entity id="target-0" mindar-image-target="targetIndex: 0">
       <a-video
         id="videoPlane"
         src="#video-LC001"
@@ -122,12 +81,8 @@
         material="shader: flat;"
       ></a-video>
     </a-entity>
-
   </a-scene>
 
-  <!-- Application logic. This file already contains the tested
-       LC001 playback + 6-second tracking grace-period behavior. -->
   <script src="app.js" defer></script>
-
 </body>
 </html>
