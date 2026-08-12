@@ -4,7 +4,7 @@
  * Flow:
  *  1. Show the branded welcome screen. Camera/AR stays OFF.
  *  2. User taps "Begin AR Experience" -> welcome hides, eagle sound
- *     plays, and MindAR starts from the user's gesture.
+ *     plays, and MindAR starts.
  *  3. When LC001 is found -> its video plays and stays anchored to it.
  *  4. When tracking is briefly lost -> keep the video playing for 6s.
  *     If the target returns within that window, playback continues.
@@ -43,9 +43,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const mindarSystem = sceneEl.systems["mindar-image-system"];
 
     if (!mindarSystem) {
-      console.error("[LawinCanvas] mindar-image-system not found on scene.");
-      startBtn.disabled = false;
-      startBtn.textContent = "TRY AGAIN";
+      console.warn("[LawinCanvas] MindAR is still loading; waiting for scene.");
+      startBtn.disabled = true;
+      sceneEl.addEventListener("loaded", () => {
+        startBtn.disabled = false;
+        startAR();
+      }, { once: true });
       return;
     }
 
@@ -53,8 +56,8 @@ document.addEventListener("DOMContentLoaded", () => {
     welcomeScreen.style.display = "none";
     setScanVisible(true);
 
-    // This is intentionally created and played from the user's button
-    // gesture so mobile browser audio policies allow it.
+    // Play from the button interaction so mobile browser audio policies
+    // can accept the user's gesture.
     const eagleSound = new Audio("assets/audio/eagle-sound.mp3");
     eagleSound.preload = "auto";
     eagleSound.play().catch((err) => {
@@ -72,7 +75,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  startBtn.addEventListener("click", startAR, { once: true });
+  // Keep one click handler so a camera/permission error can be retried.
+  startBtn.addEventListener("click", startAR);
 
   sceneEl.addEventListener("arReady", () => {
     console.log("[LawinCanvas] AR ready.");
@@ -85,9 +89,6 @@ document.addEventListener("DOMContentLoaded", () => {
     welcomeScreen.style.display = "flex";
     startBtn.disabled = false;
     startBtn.textContent = "TRY AGAIN";
-    // The listener is intentionally not removed; a second click is wired
-    // below so the user can retry after a camera/permission failure.
-    startBtn.addEventListener("click", startAR, { once: true });
   });
 
   PAINTINGS.forEach((painting) => {
